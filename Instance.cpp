@@ -11,6 +11,8 @@ void Instance::printFeatures()
 {
     for(int i = 0; i < featureList.size(); i++)
     {
+        cout << "printing feature " << i << endl;
         cout << featureList[i] << endl;
     }
+    cout << "classifier is " << this->classLabel << endl;
 }

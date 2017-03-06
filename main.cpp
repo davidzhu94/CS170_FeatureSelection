@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
+#include <cmath>
 #include "Instance.h"
 using namespace std;
 
@@ -10,32 +12,28 @@ void parseLine(string line);
 vector<Instance> testData;
 
 int main() {
-    cout << "hello" << endl;
     double result;
     Instance test;
     vector<int> items;
-    parseLine("hello  world");
-    string number = "1.23e+00";
-    string number2 = "345";
-    result = stof(number) + stoi(number2);
-    cout << result << endl;
+    parseFile();
     for(int i = 0; i < testData.size(); i++)
     {
+        cout << "test data" << i << endl;
         testData[i].printFeatures();
     }
+    cout << testData.size();
     return 0;
 }
 
 void parseFile()
 {
+    cout << "in function" << endl;
     string readClass;
     ifstream inFile("cs_170_small80.txt");
-    getline(inFile, readClass);
-    cout << readClass << endl;
     while(inFile)
     {
         getline(inFile, readClass);
-        cout << "hello" << endl;
+        cout << "getting line: " << endl<<endl << readClass <<endl<< endl;
         parseLine(readClass);
     }
     inFile.close();
@@ -49,28 +47,39 @@ void parseLine(string line)
     int classifier;
     u_int begin = 0;
     int i = 0;
-    if(line[i] == ' ' && line[i+1] == ' ')
+    for(; i < line.length(); i++)
     {
-        holder = line.substr(begin, i);
-        classifier = stoi(holder);
-        inst.classLabel = classifier;
-        i += 2;
-        begin = i;
+        if(line[i] == ' ' && line[i+1] == ' ')
+        {
+            
+            holder = line.substr(begin, i);
+            if(holder != "")
+            {
+                classifier = ceil(stof(holder));
+                inst.classLabel = classifier;
+                i += 2;
+                begin = i;
+            break;
+            }
+        }
     }
     for(; i < line.length(); i++)
     {
         if(line[i] == ' ' && line[i+1] == ' ')
         {
+            
             holder = line.substr(begin, i);
             feature = stof(holder);
-            cout << feature << endl;
             inst.featureList.push_back(feature);
             i += 2;
             begin = i;
         }
     }
     holder = line.substr(begin, line.length()-1);
-    feature = stof(holder);
-    inst.featureList.push_back(feature);
-    testData.push_back(inst);
+    if(holder != "")
+    {
+        feature = stof(holder);
+        inst.featureList.push_back(feature);
+        testData.push_back(inst);
+    }
 }
