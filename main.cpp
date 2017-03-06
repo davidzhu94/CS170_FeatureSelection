@@ -14,26 +14,17 @@ vector<Instance> testData;
 int main() {
     double result;
     Instance test;
-    vector<int> items;
     parseFile();
-    for(int i = 0; i < testData.size(); i++)
-    {
-        cout << "test data" << i << endl;
-        testData[i].printFeatures();
-    }
-    cout << testData.size();
     return 0;
 }
 
 void parseFile()
 {
-    cout << "in function" << endl;
     string readClass;
     ifstream inFile("cs_170_small80.txt");
     while(inFile)
     {
         getline(inFile, readClass);
-        cout << "getting line: " << endl<<endl << readClass <<endl<< endl;
         parseLine(readClass);
     }
     inFile.close();
