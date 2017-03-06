@@ -10,6 +10,7 @@ void parseLine(string line);
 vector<Instance> testData;
 
 int main() {
+    cout << "hello" << endl;
     double result;
     Instance test;
     vector<int> items;
