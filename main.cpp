@@ -14,13 +14,13 @@ void nearestNeighbourProcess();
 
 vector<Instance> testData;
 vector<int> indexOfExclusions;
-vector<int> selectedFeatures = {1};
+vector<int> selectedFeatures = {};
 
 int main() {
     double result;
     Instance test;
     parseFile();
-    cout << nearestNeighbour();
+    nearestNeighbourProcess();
     return 0;
 }
 
@@ -94,7 +94,7 @@ double euclideanDistance(Instance first, Instance second)
     double totalDistance = 0;
     for(int i = 0; i < selectedFeatures.size(); i++)
     {
-        cout << "iteration number " << i << "is " << selectedFeatures[i] << endl;
+       // cout << "iteration number " << i << "is " << selectedFeatures[i] << endl;
         totalDistance += sqrt(pow(first.featureList[selectedFeatures[i]] - second.featureList[selectedFeatures[i]], 2));
     }
     return totalDistance;
@@ -103,7 +103,7 @@ double euclideanDistance(Instance first, Instance second)
 double nearestNeighbour()
 {
     int indexOfNearest = 0;
-    int nearestValue = INT_MAX;
+    double nearestValue = INT_MAX;
     double currentDistance;
     double correctGuess = 0;
     double percentageCorrect = 0;
@@ -111,23 +111,49 @@ double nearestNeighbour()
     {
         if(!isExcluded(i))
         {
+            indexOfExclusions.push_back(i);
             for(int j = 0; j < testData.size(); j++)
             {
                 if(!isExcluded(j))
                 {
                     currentDistance = euclideanDistance(testData[i], testData[j]);
-                    cout << currentDistance << endl << endl;
+                   // cout << currentDistance << endl << endl;
                     if(currentDistance < nearestValue)
                     {
+                       // cout << "The current closest: " << nearestValue << " The new closest: " << currentDistance << endl;
                         indexOfNearest = j;
                         nearestValue = currentDistance;
                     }
                 }
             }
+           // cout << "test data label is " <<testData[i].classLabel << " and comparing with  " <<testData[indexOfNearest].classLabel << endl;
             if(testData[i].classLabel == testData[indexOfNearest].classLabel)
                 correctGuess++;
+            nearestValue = INT_MAX;
+            indexOfNearest = 0;
+            indexOfExclusions.pop_back();
         }
     }
-    percentageCorrect = (double)(correctGuess/pow((testData.size() - selectedFeatures.size()), 2));
+    percentageCorrect = (double)(correctGuess/(testData.size() - selectedFeatures.size()));
     return percentageCorrect;
+}
+
+void nearestNeighbourProcess()
+{
+    double holder = 0;
+    double highestPercentage = 0;
+    int highestPercentageIndex = 0;
+    cout <<testData[0].featureList.size() << endl;
+    for(int i = 0; i < testData[0].featureList.size(); i++)
+    {
+        selectedFeatures.push_back(i);
+        holder = nearestNeighbour();
+        if(holder > highestPercentage)
+        {
+            highestPercentage = holder;
+            highestPercentageIndex = i;
+        }
+        selectedFeatures.pop_back();
+    }
+    cout << "The highest percentage is: " << highestPercentage << " with feature: " << highestPercentageIndex << endl;
 }
