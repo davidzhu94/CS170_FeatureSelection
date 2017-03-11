@@ -89,6 +89,14 @@ bool isExcluded(int checkMe)
     return false;
 }
 
+bool isFeatured(int checkMe)
+{
+    for(int i = 0; i < selectedFeatures.size(); i++)
+        if(checkMe == selectedFeatures[i])
+            return true;
+    return false;
+}
+
 double euclideanDistance(Instance first, Instance second)
 {
     double totalDistance = 0;
@@ -135,7 +143,7 @@ double nearestNeighbour()
         }
     }
     percentageCorrect = (double)(correctGuess/(testData.size() - selectedFeatures.size()));
-    return percentageCorrect;
+    return percentageCorrect * 100;
 }
 
 void nearestNeighbourProcess()
@@ -143,17 +151,47 @@ void nearestNeighbourProcess()
     double holder = 0;
     double highestPercentage = 0;
     int highestPercentageIndex = 0;
-    cout <<testData[0].featureList.size() << endl;
-    for(int i = 0; i < testData[0].featureList.size(); i++)
+    vector<int> indexOfBest;
+    double bestPercentage = 0;
+    while(selectedFeatures.size() != testData[0].featureList.size())
     {
-        selectedFeatures.push_back(i);
-        holder = nearestNeighbour();
-        if(holder > highestPercentage)
+        for(int i = 0; i < testData[0].featureList.size(); i++)
         {
-            highestPercentage = holder;
-            highestPercentageIndex = i;
+            if(!isFeatured(i))
+            {
+                selectedFeatures.push_back(i);
+                holder = nearestNeighbour();
+                if(holder > highestPercentage)
+                {
+                    highestPercentage = holder;
+                    highestPercentageIndex = i;
+                }
+            selectedFeatures.pop_back();
+            }
         }
-        selectedFeatures.pop_back();
+        selectedFeatures.push_back(highestPercentageIndex);
+        cout << "The highest percentage is " << highestPercentage << " with feature(s) {";
+        for(int k = 0; k < selectedFeatures.size(); k++)
+        {
+            if(k == selectedFeatures.size()-1)
+                cout << selectedFeatures[k]+1 << "}" << endl;
+            else
+                cout << selectedFeatures[k]+1 << ",";
+        }
+        if(highestPercentage > bestPercentage)
+        {
+            cout << "New best percentage == " << highestPercentage << endl;
+            bestPercentage = highestPercentage;
+            indexOfBest.push_back(highestPercentageIndex);
+        }
+                highestPercentage = 0;
     }
-    cout << "The highest percentage is: " << highestPercentage << " with feature: " << highestPercentageIndex << endl;
+    cout << "The highest percentage is: " << bestPercentage << "% with feature(s): {";
+    for(int i = 0; i < indexOfBest.size(); i++)
+    {
+        if(i == indexOfBest.size()-1)
+            cout << selectedFeatures[i]+1 << "}" << endl;
+        else
+            cout << selectedFeatures[i]+1 << ",";
+    }
 }
