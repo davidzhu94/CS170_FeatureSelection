@@ -9,18 +9,19 @@ using namespace std;
 void parseFile();
 void parseLine(string line);
 double nearestNeighbour();
-void nearestNeighbourProcess();
-
+void exhaustiveSearch();
+void forwardSelection();
+void backwardSelection();
 
 vector<Instance> testData;
 vector<int> indexOfExclusions;
 vector<int> selectedFeatures = {};
 
 int main() {
-    double result;
     Instance test;
     parseFile();
-    nearestNeighbourProcess();
+    forwardSelection();
+    //exhaustiveSearch();
     return 0;
 }
 
@@ -102,8 +103,8 @@ double euclideanDistance(Instance first, Instance second)
     double totalDistance = 0;
     for(int i = 0; i < selectedFeatures.size(); i++)
     {
-       // cout << "iteration number " << i << "is " << selectedFeatures[i] << endl;
-        totalDistance += sqrt(pow(first.featureList[selectedFeatures[i]] - second.featureList[selectedFeatures[i]], 2));
+        if(selectedFeatures[i] != -1)
+            totalDistance += pow(first.featureList[selectedFeatures[i]] - second.featureList[selectedFeatures[i]], 2);
     }
     return totalDistance;
 }
@@ -125,16 +126,13 @@ double nearestNeighbour()
                 if(!isExcluded(j))
                 {
                     currentDistance = euclideanDistance(testData[i], testData[j]);
-                   // cout << currentDistance << endl << endl;
                     if(currentDistance < nearestValue)
                     {
-                       // cout << "The current closest: " << nearestValue << " The new closest: " << currentDistance << endl;
                         indexOfNearest = j;
                         nearestValue = currentDistance;
                     }
                 }
             }
-           // cout << "test data label is " <<testData[i].classLabel << " and comparing with  " <<testData[indexOfNearest].classLabel << endl;
             if(testData[i].classLabel == testData[indexOfNearest].classLabel)
                 correctGuess++;
             nearestValue = INT_MAX;
@@ -146,7 +144,7 @@ double nearestNeighbour()
     return percentageCorrect * 100;
 }
 
-void nearestNeighbourProcess()
+void exhaustiveSearch()
 {
     double holder = 0;
     double highestPercentage = 0;
@@ -194,4 +192,121 @@ void nearestNeighbourProcess()
         else
             cout << selectedFeatures[i]+1 << ",";
     }
+}
+
+void forwardSelection()
+{
+    bool maxima = false;
+    double holder = 0;
+    double highestPercentage = 0;
+    int highestPercentageIndex = 0;
+    vector<int> indexOfBest;
+    double bestPercentage = 0;
+    while(selectedFeatures.size() != testData[0].featureList.size())
+    {
+        for(int i = 0; i < testData[0].featureList.size(); i++)
+        {
+            if(!isFeatured(i))
+            {
+                selectedFeatures.push_back(i);
+                holder = nearestNeighbour();
+                if(holder > highestPercentage)
+                {
+                    highestPercentage = holder;
+                    highestPercentageIndex = i;
+                }
+                selectedFeatures.pop_back();
+            }
+        }
+        selectedFeatures.push_back(highestPercentageIndex);
+        cout << "The highest percentage is " << highestPercentage << " with feature(s) {";
+        for(int k = 0; k < selectedFeatures.size(); k++)
+        {
+            if(k == selectedFeatures.size()-1)
+                cout << selectedFeatures[k]+1 << "}" << endl;
+            else
+                cout << selectedFeatures[k]+1 << ",";
+        }
+        if(highestPercentage > bestPercentage)
+        {
+            cout << "New best percentage == " << highestPercentage << endl;
+            bestPercentage = highestPercentage;
+            indexOfBest.push_back(highestPercentageIndex);
+        }
+        if(highestPercentage < bestPercentage && maxima)
+        {
+            cout << "Accuracy is still lower than best accuracy!" << endl;
+            break;
+        }
+        if(highestPercentage < bestPercentage && !maxima)
+        {
+            cout << "Accuracy decreased! Continue checking in case of local maxima" << endl;
+            maxima = true;
+        }
+        highestPercentage = 0;
+    }
+    cout << "Finished Search! The best percentage is: " << bestPercentage << "% with feature(s): {";
+    for(int i = 0; i < indexOfBest.size(); i++)
+    {
+        if(i == indexOfBest.size()-1)
+            cout << selectedFeatures[i]+1 << "}" << endl;
+        else
+            cout << selectedFeatures[i]+1 << ",";
+    }
+
+}
+
+void backwardSelection()
+{
+    for(int i = 0; i < testData[0].featureList.size(); i++)
+        selectedFeatures.push_back(i);
+    int featureIndexHolder;
+    double holder = 0;
+    double highestPercentage = 0;
+    int highestPercentageIndex = 0;
+    vector<int> indexOfBest;
+    double bestPercentage = 0;
+    while(selectedFeatures.size() != 0)
+    {
+        for(int i = 0; i < testData[0].featureList.size(); i++)
+        {
+            featureIndexHolder = selectedFeatures[i];
+            selectedFeatures[i] = -1;
+            holder = nearestNeighbour();
+            if(holder >= highestPercentage)
+            {
+                highestPercentage = holder;
+                highestPercentageIndex = i;
+            }
+            selectedFeatures[i] = featureIndexHolder;
+            
+        }
+        selectedFeatures[highestPercentageIndex] = -1;
+        cout << "The highest percentage is " << highestPercentage << " with feature(s) {";
+        for(int k = 0; k < selectedFeatures.size(); k++)
+        {
+            if(selectedFeatures[k] != -1)
+            {
+                if(k == selectedFeatures.size()-1)
+                    cout << selectedFeatures[k]+1 << "}" << endl;
+                else
+                    cout << selectedFeatures[k]+1 << ",";
+            }
+        }
+        if(highestPercentage < bestPercentage)
+        {
+            cout << "Local maxima found!" << endl;
+            break;
+        }
+        highestPercentage = 0;
+    }
+    cout << "The highest percentage is: " << bestPercentage << "% with feature(s): {";
+    for(int i = 0; i < indexOfBest.size(); i++)
+    {
+        if(i == indexOfBest.size()-1)
+            cout << selectedFeatures[i]+1 << "}" << endl;
+        else
+            cout << selectedFeatures[i]+1 << ",";
+    }
+
 }
