@@ -6,7 +6,7 @@
 #include "Instance.h"
 using namespace std;
 
-void parseFile();
+void parseFile(string filename);
 void parseLine(string line);
 double nearestNeighbour();
 void exhaustiveSearch();
@@ -18,23 +18,45 @@ vector<int> indexOfExclusions;
 vector<int> selectedFeatures = {};
 
 int main() {
-    Instance test;
-    parseFile();
-    forwardSelection();
-    //exhaustiveSearch();
+    string filename;
+    int selector;
+    cout << "Welcome to David Zhu's Feature Selection Algorithm!" << endl;
+    cout << "Please enter the name of the file to test: " << endl;
+    cin >> filename;
+    parseFile(filename);
+    cout << endl << "Please select the algorithm you want to run" << endl;
+    cout << endl << "1) Exhaustive Search" << endl << "2) Forward Selection" << endl << "3) Backward Selection" << endl;
+    cin >> selector;
+    cout << endl << "begin search!" << endl << endl;
+    switch(selector)
+    {
+        case 1:
+            exhaustiveSearch();
+            break;
+        case 2:
+            forwardSelection();
+            break;
+        case 3:
+            backwardSelection();
+            break;
+        default:
+            cout << "Invalid Input" << endl;
+    }
+    
     return 0;
 }
-
-void parseFile()
+//cs_170_small80 copy.txt
+void parseFile(string filename)
 {
     string readClass;
-    ifstream inFile("cs_170_small80.txt");
+    ifstream inFile(filename);
     while(inFile)
     {
         getline(inFile, readClass);
         parseLine(readClass);
     }
     inFile.close();
+    cout << endl << "The dataset has " << testData[0].featureList.size() << " features with " << testData.size() << " instances." << endl;
 }
 
 void parseLine(string line)
@@ -168,7 +190,7 @@ void exhaustiveSearch()
             }
         }
         selectedFeatures.push_back(highestPercentageIndex);
-        cout << "The highest percentage is " << highestPercentage << " with feature(s) {";
+        cout << "The highest percentage is " << highestPercentage << "% with feature(s) {";
         for(int k = 0; k < selectedFeatures.size(); k++)
         {
             if(k == selectedFeatures.size()-1)
@@ -178,7 +200,6 @@ void exhaustiveSearch()
         }
         if(highestPercentage > bestPercentage)
         {
-            cout << "New best percentage == " << highestPercentage << endl;
             bestPercentage = highestPercentage;
             indexOfBest.push_back(highestPercentageIndex);
         }
@@ -215,17 +236,30 @@ void forwardSelection()
                     highestPercentage = holder;
                     highestPercentageIndex = i;
                 }
+                cout << "          Percentage of " << holder << "% with features {";
+                for(int k = 0; k < selectedFeatures.size(); k++)
+                {
+                    if(k == selectedFeatures.size()-1)
+                        cout << selectedFeatures[k]+1 << "}" << endl;
+                    else
+                        cout << selectedFeatures[k]+1 << ",";
+                }
                 selectedFeatures.pop_back();
             }
         }
         selectedFeatures.push_back(highestPercentageIndex);
-        cout << "The highest percentage is " << highestPercentage << " with feature(s) {";
+        cout << endl << "The highest percentage is " << highestPercentage << "% with feature(s) {";
         for(int k = 0; k < selectedFeatures.size(); k++)
         {
             if(k == selectedFeatures.size()-1)
-                cout << selectedFeatures[k]+1 << "}" << endl;
+                cout << selectedFeatures[k]+1 << "}" << endl << endl;
             else
                 cout << selectedFeatures[k]+1 << ",";
+        }
+        if(highestPercentage > bestPercentage && maxima)
+        {
+            cout << "New higher accuracy! Continuing to search!" << endl;
+            maxima = false;
         }
         if(highestPercentage > bestPercentage)
         {
@@ -290,11 +324,25 @@ void backwardSelection()
                     highestPercentage = holder;
                     highestPercentageIndex = i;
                 }
+                cout << "          Percentage of " << holder << " with feature(s) {";
+                for(int k = 0; k < selectedFeatures.size(); k++)
+                {
+                    if(selectedFeatures[k] != -1)
+                    {
+                        if(k == selectedFeatures.size()-1)
+                            cout << selectedFeatures[k]+1 << "}";
+                        else
+                            cout << selectedFeatures[k]+1 << ",";
+                    }
+                }
+                if(selectedFeatures[selectedFeatures.size()-1] == -1)
+                    cout << "}";
+                cout << endl;
                 selectedFeatures[i] = featureIndexHolder;
             }
         }
         selectedFeatures[highestPercentageIndex] = -1;
-        cout << "The highest percentage is " << highestPercentage << " with feature(s) {";
+        cout << endl << "The highest percentage is " << highestPercentage << "% with feature(s) {";
         for(int k = 0; k < selectedFeatures.size(); k++)
         {
             if(selectedFeatures[k] != -1)
@@ -307,7 +355,12 @@ void backwardSelection()
         }
         if(selectedFeatures[selectedFeatures.size()-1] == -1)
             cout << "}";
-        cout << endl;
+        cout << endl << endl;
+        if(highestPercentage > bestPercentage && maxima)
+        {
+            cout << "New higher accuracy! Continuing to search!" << endl;
+            maxima = false;
+        }
         if(highestPercentage > bestPercentage)
         {
             bestPercentage = highestPercentage;
@@ -323,7 +376,7 @@ void backwardSelection()
             cout << "Accuracy decreased! Continue checking in case of local maxima" << endl;
             maxima = true;
         }
-
+        
         highestPercentage = 0;
     }
     cout << "The highest percentage is: " << bestPercentage << "% with feature(s): {";
