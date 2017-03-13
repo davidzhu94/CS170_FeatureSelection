@@ -229,7 +229,6 @@ void forwardSelection()
         }
         if(highestPercentage > bestPercentage)
         {
-            cout << "New best percentage == " << highestPercentage << endl;
             bestPercentage = highestPercentage;
             indexOfBest.push_back(highestPercentageIndex);
         }
@@ -256,30 +255,43 @@ void forwardSelection()
 
 }
 
+bool backwardCheckFeatures()
+{
+    for(int i = 0; i < selectedFeatures.size(); i++)
+    {
+        if(selectedFeatures[i] != -1)
+            return true;
+    }
+    return false;
+}
+
 void backwardSelection()
 {
     for(int i = 0; i < testData[0].featureList.size(); i++)
         selectedFeatures.push_back(i);
+    bool maxima = false;
     int featureIndexHolder;
     double holder = 0;
     double highestPercentage = 0;
     int highestPercentageIndex = 0;
     vector<int> indexOfBest;
     double bestPercentage = 0;
-    while(selectedFeatures.size() != 0)
+    while(backwardCheckFeatures())
     {
         for(int i = 0; i < testData[0].featureList.size(); i++)
         {
-            featureIndexHolder = selectedFeatures[i];
-            selectedFeatures[i] = -1;
-            holder = nearestNeighbour();
-            if(holder >= highestPercentage)
+            if(selectedFeatures[i] != -1)
             {
-                highestPercentage = holder;
-                highestPercentageIndex = i;
+                featureIndexHolder = selectedFeatures[i];
+                selectedFeatures[i] = -1;
+                holder = nearestNeighbour();
+                if(holder >= highestPercentage)
+                {
+                    highestPercentage = holder;
+                    highestPercentageIndex = i;
+                }
+                selectedFeatures[i] = featureIndexHolder;
             }
-            selectedFeatures[i] = featureIndexHolder;
-            
         }
         selectedFeatures[highestPercentageIndex] = -1;
         cout << "The highest percentage is " << highestPercentage << " with feature(s) {";
@@ -288,25 +300,42 @@ void backwardSelection()
             if(selectedFeatures[k] != -1)
             {
                 if(k == selectedFeatures.size()-1)
-                    cout << selectedFeatures[k]+1 << "}" << endl;
+                    cout << selectedFeatures[k]+1 << "}";
                 else
                     cout << selectedFeatures[k]+1 << ",";
             }
         }
-        if(highestPercentage < bestPercentage)
+        if(selectedFeatures[selectedFeatures.size()-1] == -1)
+            cout << "}";
+        cout << endl;
+        if(highestPercentage > bestPercentage)
         {
-            cout << "Local maxima found!" << endl;
+            bestPercentage = highestPercentage;
+            indexOfBest = selectedFeatures;;
+        }
+        if(highestPercentage < bestPercentage && maxima)
+        {
+            cout << "Accuracy is still lower than best accuracy!" << endl;
             break;
         }
+        if(highestPercentage < bestPercentage && !maxima)
+        {
+            cout << "Accuracy decreased! Continue checking in case of local maxima" << endl;
+            maxima = true;
+        }
+
         highestPercentage = 0;
     }
     cout << "The highest percentage is: " << bestPercentage << "% with feature(s): {";
     for(int i = 0; i < indexOfBest.size(); i++)
     {
-        if(i == indexOfBest.size()-1)
-            cout << selectedFeatures[i]+1 << "}" << endl;
-        else
-            cout << selectedFeatures[i]+1 << ",";
+        if(indexOfBest[i] != -1)
+        {
+            if(i == indexOfBest.size()-1)
+                cout << indexOfBest[i]+1 << "}" << endl;
+            else
+                cout << indexOfBest[i]+1 << ",";
+        }
     }
 
 }
