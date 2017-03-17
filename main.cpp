@@ -25,19 +25,19 @@ int main() {
     cin >> filename;
     parseFile(filename);
     cout << endl << "Please select the algorithm you want to run" << endl;
-    cout << endl << "1) Exhaustive Search" << endl << "2) Forward Selection" << endl << "3) Backward Selection" << endl;
+    cout << endl << "1) Forward Search" << endl << "2) Backward Selection" << endl << "3) Exhaustive Selection" << endl;
     cin >> selector;
     cout << endl << "begin search!" << endl << endl;
     switch(selector)
     {
         case 1:
-            exhaustiveSearch();
-            break;
-        case 2:
             forwardSelection();
             break;
-        case 3:
+        case 2:
             backwardSelection();
+            break;
+        case 3:
+            exhaustiveSearch();
             break;
         default:
             cout << "Invalid Input" << endl;
@@ -186,15 +186,24 @@ void exhaustiveSearch()
                     highestPercentage = holder;
                     highestPercentageIndex = i;
                 }
+                cout << "          Percentage of " << holder << "% with features {";
+                for(int k = 0; k < selectedFeatures.size(); k++)
+                {
+                    if(k == selectedFeatures.size()-1)
+                        cout << selectedFeatures[k]+1 << "}" << endl;
+                    else
+                        cout << selectedFeatures[k]+1 << ",";
+                }
             selectedFeatures.pop_back();
             }
         }
+        cout << endl;
         selectedFeatures.push_back(highestPercentageIndex);
         cout << "The highest percentage is " << highestPercentage << "% with feature(s) {";
         for(int k = 0; k < selectedFeatures.size(); k++)
         {
             if(k == selectedFeatures.size()-1)
-                cout << selectedFeatures[k]+1 << "}" << endl;
+                cout << selectedFeatures[k]+1 << "}" << endl << endl;
             else
                 cout << selectedFeatures[k]+1 << ",";
         }
@@ -205,7 +214,7 @@ void exhaustiveSearch()
         }
                 highestPercentage = 0;
     }
-    cout << "The highest percentage is: " << bestPercentage << "% with feature(s): {";
+    cout << "Finished Search! The best percentage is: " << bestPercentage << "% with feature(s): {";
     for(int i = 0; i < indexOfBest.size(); i++)
     {
         if(i == indexOfBest.size()-1)
@@ -213,6 +222,7 @@ void exhaustiveSearch()
         else
             cout << selectedFeatures[i]+1 << ",";
     }
+
 }
 
 void forwardSelection()
