@@ -25,7 +25,7 @@ int main() {
     cin >> filename;
     parseFile(filename);
     cout << endl << "Please select the algorithm you want to run" << endl;
-    cout << endl << "1) Forward Search" << endl << "2) Backward Selection" << endl << "3) Exhaustive Selection" << endl;
+    cout << endl << "1) Forward Selection" << endl << "2) Backward Selection" << endl << "3) Exhaustive Search" << endl;
     cin >> selector;
     cout << endl << "begin search!" << endl << endl;
     switch(selector)
@@ -390,15 +390,17 @@ void backwardSelection()
         highestPercentage = 0;
     }
     cout << "The highest percentage is: " << bestPercentage << "% with feature(s): {";
-    for(int i = 0; i < indexOfBest.size(); i++)
+    for(int k = 0; k < indexOfBest.size(); k++)
     {
-        if(indexOfBest[i] != -1)
+        if(indexOfBest[k] != -1)
         {
-            if(i == indexOfBest.size()-1)
-                cout << indexOfBest[i]+1 << "}" << endl;
+            if(k == indexOfBest.size()-1)
+                cout << indexOfBest[k]+1 << "}";
             else
-                cout << indexOfBest[i]+1 << ",";
+                cout << indexOfBest[k]+1 << ",";
         }
     }
-
+    if(indexOfBest[indexOfBest.size()-1] == -1)
+        cout << "}";
+    cout << endl << endl;
 }
